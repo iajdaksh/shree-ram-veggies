@@ -145,7 +145,7 @@ export default function HomePage() {
             <h2 className="font-serif text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
                 Featured products
               </h2>
-              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Freshest picks from today's batch</p>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Freshest picks from today&apos;s batch</p>
             </div>
             <Link href="/products" className="btn btn-secondary btn-sm">
               All products <ArrowRight size={13} />
@@ -247,7 +247,7 @@ export default function HomePage() {
                     <Star key={j} size={13} fill="#C96A2A" style={{ color: '#C96A2A' }} />
                   ))}
                 </div>
-                <p className="text-sm mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>"{t.text}"</p>
+                <p className="text-sm mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>&quot;{t.text}&quot;</p>
                 <div>
                   <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{t.name}</p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t.area}, Muzaffarnagar</p>

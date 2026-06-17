@@ -43,7 +43,7 @@ export default function AboutPage() {
                 About <span className="shimmer-text">Shree Ram</span> Veggies
               </h1>
               <p className="text-lg max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-                Since 2000, we've been delivering the freshest vegetables and fruits to the families of Muzaffarnagar — with love, dedication, and uncompromising quality.
+                Since 2000, we&apos;ve been delivering the freshest vegetables and fruits to the families of Muzaffarnagar — with love, dedication, and uncompromising quality.
               </p>
             </motion.div>
           </div>
@@ -79,7 +79,7 @@ export default function AboutPage() {
                 <div className="space-y-4 text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   <p>It all began in 2000 when <strong style={{ color: 'var(--accent)' }}>Ramachandra Prajapati</strong> recognized the need for fresh, high-quality vegetables delivered directly to homes. Instead of expecting families to navigate crowded markets, he decided to bring the market to them.</p>
                   <p>We do not own agricultural land; instead, we have built strong relationships with local farmers and the main Sabji Mandi. Every morning, before the city wakes up, our team is at the market handpicking the best produce available.</p>
-                  <p>This fresh produce is then carefully sorted, graded, and delivered to over 5,000 families across the city. Whether it's daily vegetables or seasonal fruits, we ensure you get the very best, straight to your kitchen.</p>
+                  <p>This fresh produce is then carefully sorted, graded, and delivered to over 5,000 families across the city. Whether it&apos;s daily vegetables or seasonal fruits, we ensure you get the very best, straight to your kitchen.</p>
                 </div>
               </motion.div>
               <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}

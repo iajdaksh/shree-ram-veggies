@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
@@ -28,7 +28,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
   cancelled: { label: 'Cancelled', color: 'status-cancelled', icon: X },
 }
 
-export default function OrdersPage() {
+function OrdersContent() {
   const { user } = useAuth()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -136,5 +136,13 @@ export default function OrdersPage() {
         </div>
       )}
     </motion.div>
+  )
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-gray-500">Loading orders...</div>}>
+      <OrdersContent />
+    </Suspense>
   )
 }
