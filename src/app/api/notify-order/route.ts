@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       message: `${userName} placed an order of ₹${total} (${deliveryType === 'pickup' ? 'Pickup' : 'Delivery'})`,
       order_id: orderId,
       is_read: false,
-    }).catch(() => {}) // non-blocking, table may not exist yet
+    }) // non-blocking, table may not exist yet
 
     // --- WhatsApp via Twilio / Meta API (configure WHATSAPP_API_KEY in env) ---
     if (whatsappNumber && process.env.WHATSAPP_ACCESS_TOKEN) {
