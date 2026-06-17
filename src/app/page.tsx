@@ -46,7 +46,7 @@ export default function HomePage() {
   }, [])
 
   const add = (p: typeof DEMO_PRODUCTS[0]) => {
-    addItem({ id: p.id, name: p.name, price: p.price, unit: p.unit, image_url: null, category: p.category })
+    addItem({ id: p.id, name: p.name, price: p.price, unit: p.unit, image_url: null })
     toast.success(`${p.name} added to cart`)
   }
 
