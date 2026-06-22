@@ -45,13 +45,14 @@ export default function AccountPage() {
       })
     })
 
+    const json = await res.json()
+
     if (!res.ok) {
       setSaving(false)
-      toast.error(`API Error: ${res.status}. Server restart required.`)
+      toast.error(json.error || `API Error: ${res.status}.`)
       return
     }
 
-    const json = await res.json()
 
     setSaving(false)
     if (!json.success) toast.error(json.error || 'Failed to save')
