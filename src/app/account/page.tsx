@@ -13,7 +13,6 @@ export default function AccountPage() {
   const [whatsapp, setWhatsapp] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [changingPass, setChangingPass] = useState(false)
@@ -63,27 +62,27 @@ export default function AccountPage() {
   }
 
   const handlePasswordChange = async () => {
-    if (!oldPassword || !newPassword || !confirmPassword) {
-      toast.error('Please fill all password fields')
-      return
-    }
     if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match')
+      toast.error('New passwords do not match.')
       return
     }
     if (newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters')
+      toast.error('New password must be at least 8 characters long.')
       return
     }
     setChangingPass(true)
-    // Placeholder: Password reset with NextAuth requires backend API logic
-    setTimeout(() => {
-      toast.success('Password update requested! (Backend integration required)')
-      setOldPassword('')
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+
+    setChangingPass(false)
+
+    if (error) {
+      toast.error(error.message)
+    } else {
+      toast.success('Password updated successfully!')
       setNewPassword('')
       setConfirmPassword('')
-      setChangingPass(false)
-    }, 1000)
+    }
   }
 
   const handleDeleteAccount = () => {
@@ -156,23 +155,17 @@ export default function AccountPage() {
       {/* Security / Password Change */}
       <div className="glass-card-static p-6">
         <h3 className="font-bold mb-5" style={{ color: 'var(--text-primary)' }}>Security</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div>
-            <label className="block text-xs font-bold mb-2 uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
-              Old Password *
-            </label>
-            <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
-              <input type="password" value={oldPassword} onChange={e => setOldPassword(e.target.value)} placeholder="••••••••" className="glass-input !pl-10" />
-            </div>
-          </div>
+        <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
+          Update your password. This only works for accounts created with email and password. If you signed up with Google, you must manage your password through Google.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label className="block text-xs font-bold mb-2 uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
               New Password *
             </label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
-              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="••••••••" className="glass-input !pl-10" />
+              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password (min 8 chars)" className="glass-input !pl-10" />
             </div>
           </div>
           <div>
@@ -186,7 +179,7 @@ export default function AccountPage() {
           </div>
         </div>
         <div className="mt-6 flex justify-end">
-          <button onClick={handlePasswordChange} disabled={changingPass || !oldPassword || !newPassword || !confirmPassword} className="btn btn-secondary">
+          <button onClick={handlePasswordChange} disabled={changingPass || !newPassword || !confirmPassword} className="btn btn-secondary">
             {changingPass ? <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Lock size={16} />}
             Update Password
           </button>
