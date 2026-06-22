@@ -175,7 +175,7 @@ export default function HomePage() {
                       <span className="text-xs ml-1 leading-none" style={{ color: 'var(--text-muted)' }}>/{p.unit}</span>
                     </div>
                     <button onClick={() => add(p)}
-                      className="flex items-center gap-1.5 btn-primary text-xs px-3 py-1.5 rounded-full">
+                      className="btn btn-primary btn-sm rounded-full flex items-center gap-1.5">
                       <ShoppingCart size={13} /> Add
                     </button>
                   </div>

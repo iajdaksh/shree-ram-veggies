@@ -20,7 +20,18 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     if (!loading && !user) router.push('/auth')
   }, [user, loading])
 
-  if (loading || !user) return null
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen pt-32 pb-16 flex justify-center items-start">
+          <span className="w-8 h-8 border-4 border-current border-t-transparent rounded-full animate-spin" style={{ color: 'var(--accent)' }} />
+        </div>
+      </>
+    )
+  }
+
+  if (!user) return null
 
   return (
     <>
@@ -30,7 +41,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {/* Sidebar */}
             <div className="md:col-span-1">
-              <div className="glass-card-static p-5 sticky top-24">
+              <div className="glass-card p-5 sticky top-24 shadow-lg">
                 {/* Profile card */}
                 <div className="text-center mb-5 pb-5 border-b" style={{ borderColor: 'var(--glass-border)' }}>
                   <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-2xl font-bold overflow-hidden"
@@ -43,18 +54,21 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
                   <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{profile?.email || user?.email}</p>
                 </div>
                 {/* Links */}
-                <nav className="space-y-1">
+                <nav className="space-y-1.5 mt-2">
                   {ACCOUNT_LINKS.map(link => (
-                    <Link key={link.href} href={link.href} className="sidebar-item">
-                      <link.icon size={16} />{link.label}
+                    <Link key={link.href} href={link.href} className="sidebar-item flex items-center gap-3 w-full px-3 py-2.5 rounded-md transition-colors hover:bg-white/5">
+                      <link.icon size={18} style={{ color: 'var(--text-muted)' }} />
+                      <span className="font-medium">{link.label}</span>
                     </Link>
                   ))}
-                  <div className="section-divider my-3" />
-                  <Link href="/" className="sidebar-item">
-                    <Home size={16} />Home
+                  <div className="h-px w-full my-3" style={{ background: 'var(--border-light)' }} />
+                  <Link href="/" className="sidebar-item flex items-center gap-3 w-full px-3 py-2.5 rounded-md transition-colors hover:bg-white/5">
+                    <Home size={18} style={{ color: 'var(--text-muted)' }} />
+                    <span className="font-medium">Home</span>
                   </Link>
-                  <button onClick={signOut} className="sidebar-item w-full text-left" style={{ color: 'var(--danger)' }}>
-                    <LogOut size={16} />Sign Out
+                  <button onClick={signOut} className="sidebar-item flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-left transition-colors hover:bg-white/5" style={{ color: 'var(--danger)' }}>
+                    <LogOut size={18} />
+                    <span className="font-medium">Sign Out</span>
                   </button>
                 </nav>
               </div>

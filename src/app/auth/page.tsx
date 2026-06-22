@@ -40,15 +40,20 @@ export default function AuthPage() {
     setLoading(true)
     try {
       if (mode === 'signin') {
-        const { error } = await signInEmail(email, password)
-        if (error) { toast.error(error); return }
+        const res = await signInEmail(email, password)
+        if (res.error) { toast.error(res.error); return }
         toast.success('Welcome back!')
         router.push('/')
       } else {
-        const { error } = await signUpEmail(email, password, name)
-        if (error) { toast.error(error); return }
-        toast.success('Account created! Welcome aboard 🎉')
-        router.push('/')
+        const res = await signUpEmail(email, password, name)
+        if (res.error) { toast.error(res.error); return }
+        if (res.data?.session) {
+          toast.success('Account created! Welcome aboard 🎉')
+          router.push('/')
+        } else {
+          toast.success('Account created! Please check your email to verify.')
+          setMode('signin')
+        }
       }
     } finally { setLoading(false) }
   }

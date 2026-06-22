@@ -29,7 +29,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
 }
 
 function OrdersContent() {
-  const { user } = useAuth()
+  const { profile } = useAuth()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<string | null>(null)
@@ -37,13 +37,13 @@ function OrdersContent() {
   const successOrder = searchParams.get('success')
 
   useEffect(() => {
-    if (!user) return
-    supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+    if (!profile) return
+    supabase.from('orders').select('*').eq('user_id', profile.id).order('created_at', { ascending: false })
       .then(({ data }) => {
         setOrders((data as Order[]) || [])
         setLoading(false)
       })
-  }, [user])
+  }, [profile])
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -70,7 +70,9 @@ function OrdersContent() {
         </div>
       ) : orders.length === 0 ? (
         <div className="glass-card-static p-12 text-center">
-          <div className="text-5xl mb-4">📦</div>
+          <div className="flex justify-center mb-4">
+            <Package size={48} style={{ color: 'var(--text-muted)' }} strokeWidth={1.5} />
+          </div>
           <p className="font-bold" style={{ color: 'var(--text-primary)' }}>No orders yet</p>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Your order history will appear here</p>
         </div>

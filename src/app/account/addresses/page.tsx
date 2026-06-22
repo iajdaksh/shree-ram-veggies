@@ -22,7 +22,7 @@ const BLANK: Omit<Address, 'id'> = {
 }
 
 export default function AddressesPage() {
-  const { user } = useAuth()
+  const { profile } = useAuth()
   const [addresses, setAddresses] = useState<Address[]>([])
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ ...BLANK })
@@ -30,13 +30,14 @@ export default function AddressesPage() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (!user) return
-    supabase.from('addresses').select('*').eq('user_id', user.id).order('is_default', { ascending: false })
+    if (!profile) return
+    supabase.from('addresses').select('*').eq('user_id', profile.id).order('is_default', { ascending: false })
       .then(({ data }) => setAddresses((data as Address[]) || []))
-  }, [user])
+  }, [profile])
 
   const handleSave = async () => {
     if (!form.address_line1 || !form.city || !form.pincode) { toast.error('Fill all required fields'); return }
+    if (!profile) return
     setSaving(true)
     try {
       if (editId) {
@@ -44,7 +45,7 @@ export default function AddressesPage() {
         setAddresses(prev => prev.map(a => a.id === editId ? { ...a, ...form } : a))
         toast.success('Address updated!')
       } else {
-        const { data, error } = await supabase.from('addresses').insert({ ...form, user_id: user!.id }).select().single()
+        const { data, error } = await supabase.from('addresses').insert({ ...form, user_id: profile.id }).select().single()
         if (error) throw error
         setAddresses(prev => [...prev, data as Address])
         toast.success('Address added!')
@@ -63,7 +64,8 @@ export default function AddressesPage() {
   }
 
   const setDefault = async (id: string) => {
-    await supabase.from('addresses').update({ is_default: false }).eq('user_id', user!.id)
+    if (!profile) return
+    await supabase.from('addresses').update({ is_default: false }).eq('user_id', profile.id)
     await supabase.from('addresses').update({ is_default: true }).eq('id', id)
     setAddresses(prev => prev.map(a => ({ ...a, is_default: a.id === id })))
   }
@@ -82,7 +84,7 @@ export default function AddressesPage() {
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Manage your saved addresses</p>
         </div>
         <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ ...BLANK }) }}
-          className="btn-primary flex items-center gap-2 text-sm">
+          className="btn btn-primary btn-sm">
           <Plus size={15} /> Add New
         </button>
       </div>
@@ -121,11 +123,11 @@ export default function AddressesPage() {
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2">
+              <button onClick={handleSave} disabled={saving} className="btn btn-primary">
                 {saving ? <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : null}
                 Save Address
               </button>
-              <button onClick={() => { setShowForm(false); setEditId(null) }} className="btn-glass">Cancel</button>
+              <button onClick={() => { setShowForm(false); setEditId(null) }} className="btn btn-secondary">Cancel</button>
             </div>
           </motion.div>
         )}
@@ -134,10 +136,12 @@ export default function AddressesPage() {
       <div className="space-y-4">
         {addresses.length === 0 && !showForm && (
           <div className="glass-card-static p-12 text-center">
-            <div className="text-5xl mb-4">📍</div>
+            <div className="flex justify-center mb-4">
+              <MapPin size={48} style={{ color: 'var(--text-muted)' }} strokeWidth={1.5} />
+            </div>
             <p className="font-bold" style={{ color: 'var(--text-primary)' }}>No addresses saved</p>
             <p className="text-sm mt-1 mb-5" style={{ color: 'var(--text-muted)' }}>Add your delivery address to speed up checkout</p>
-            <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2 mx-auto">
+            <button onClick={() => setShowForm(true)} className="btn btn-primary mx-auto">
               <Plus size={15} /> Add Address
             </button>
           </div>

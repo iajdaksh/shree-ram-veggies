@@ -1,6 +1,5 @@
 'use client'
 import { createContext, useContext, useEffect, useState } from 'react'
-import { useSession, signIn, signOut } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 
 type Profile = {
@@ -19,8 +18,8 @@ type AuthContextType = {
   loading:        boolean
   isAdmin:        boolean
   signInGoogle:   () => Promise<void>
-  signInEmail:    (email: string, password: string) => Promise<{ error?: string }>
-  signUpEmail:    (email: string, password: string, name: string) => Promise<{ error?: string }>
+  signInEmail:    (email: string, password: string) => Promise<{ error?: string, data?: any }>
+  signUpEmail:    (email: string, password: string, name: string) => Promise<{ error?: string, data?: any }>
   logout:         () => Promise<void>
   signOut:        () => Promise<void>
   refreshProfile: () => Promise<void>
@@ -29,52 +28,107 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession()
+  const [user, setUser] = useState<any | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const loading = status === 'loading'
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (session?.user?.email) fetchProfile(session.user.email)
-    else setProfile(null)
-  }, [session])
+    let mounted = true
 
-  const fetchProfile = async (email: string) => {
-    const { data } = await supabase.from('profiles').select('*').eq('email', email).single()
-    if (data) setProfile(data as Profile)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) {
+        setUser(session?.user || null)
+        if (session?.user?.email) fetchProfile(session.user.email, session.user.user_metadata?.full_name)
+        else setLoading(false)
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (_event === 'INITIAL_SESSION') return // Prevent double fetch on initial load
+
+      setUser(session?.user || null)
+      if (session?.user?.email) {
+        setLoading(true)
+        fetchProfile(session.user.email, session.user.user_metadata?.full_name)
+      } else {
+        setProfile(null)
+        setLoading(false)
+      }
+    })
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const fetchProfile = async (email: string, userName?: string | null) => {
+    try {
+      const { data, error } = await supabase.from('profiles').select('*').eq('email', email).single()
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Supabase DB Error:', error)
+      }
+
+      if (data) {
+        setProfile(data as Profile)
+      } else {
+        // Profile doesn't exist yet, create it automatically!
+        const res = await fetch('/api/update-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, full_name: userName || email.split('@')[0] })
+        })
+        
+        if (res.ok) {
+          const json = await res.json()
+          if (json.success) setProfile(json.data as Profile)
+        } else {
+          console.error('API Route /api/update-profile not found. Please restart the dev server.')
+        }
+      }
+    } catch (error) {
+      console.error('Fetch profile error:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const signInGoogle = async () => {
-    await signIn('google', { callbackUrl: '/' })
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    })
   }
 
   const signInEmail = async (email: string, password: string) => {
-    const res = await signIn('credentials', {
-      email, password, action: 'signin', redirect: false,
-    })
-    if (res?.error) return { error: res.error === 'CredentialsSignin' ? 'Invalid email or password' : res.error }
-    return {}
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) return { error: error.message }
+    return { data }
   }
 
   const signUpEmail = async (email: string, password: string, name: string) => {
-    const res = await signIn('credentials', {
-      email, password, name, action: 'signup', redirect: false,
+    const { error, data } = await supabase.auth.signUp({
+      email, password,
+      options: { data: { full_name: name } }
     })
-    if (res?.error) return { error: res.error }
-    return {}
+    if (error) return { error: error.message }
+    return { data }
   }
 
   const logout = async () => {
     setProfile(null)
-    await signOut({ callbackUrl: '/' })
+    setUser(null)
+    await supabase.auth.signOut()
+    window.location.href = '/'
   }
 
   const refreshProfile = async () => {
-    if (session?.user?.email) await fetchProfile(session.user.email)
+    if (user?.email) await fetchProfile(user.email, user?.user_metadata?.full_name)
   }
 
   return (
     <AuthContext.Provider value={{
-      user: session?.user || null,
+      user,
       profile,
       loading,
       isAdmin: profile?.role === 'admin',

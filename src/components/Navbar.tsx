@@ -106,8 +106,8 @@ export default function Navbar() {
         style={{ x: ringX, y: ringY, left: -18, top: -18 }}
         animate={{
           scale: isClicking ? 0.8 : isHovering ? 1.5 : 1,
-          backgroundColor: isHovering ? 'rgba(142, 182, 155, 0.4)' : 'transparent',
-          borderColor: isHovering ? 'transparent' : 'var(--border-strong)'
+          backgroundColor: isHovering ? 'rgba(142, 182, 155, 0.4)' : 'rgba(142, 182, 155, 0)',
+          borderColor: isHovering ? 'rgba(35, 83, 71, 0)' : 'var(--border-strong)'
         }}
         transition={{ duration: 0.15 }}
       />
@@ -153,30 +153,21 @@ export default function Navbar() {
             {user || profile ? (
               <div className="relative" ref={menuRef}>
                 <button onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 btn btn-secondary px-2.5 py-1.5">
+                  className="btn btn-icon btn-secondary relative">
                   <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold"
-                    style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>
+                    style={{ color: 'var(--accent)' }}>
                     {profile?.avatar_url || user?.user_metadata?.avatar_url || user?.image
                       ? <img src={profile?.avatar_url || user?.user_metadata?.avatar_url || user?.image} className="w-full h-full object-cover" alt="avatar" />
-                      : (profile?.full_name?.[0] || user?.user_metadata?.full_name?.[0] || user?.email?.[0] || 'U').toUpperCase()
+                      : <User size={14} style={{ color: 'var(--accent)' }} />
                     }
                   </div>
-                  <span className="text-sm font-medium hidden sm:block" style={{ color: 'var(--text-primary)' }}>
-                    {(profile?.full_name || user?.user_metadata?.full_name || user?.email || 'Account').split(' ')[0]}
-                  </span>
-                  <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} />
                 </button>
 
                 <AnimatePresence>
                   {userMenuOpen && (
                     <motion.div initial={{ opacity: 0, y: 6, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.97 }} transition={{ duration: 0.12 }}
-                      className="card absolute right-0 mt-1.5 w-52 p-1.5 z-50">
-                      <div className="px-3 py-2 mb-1">
-                        <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{profile?.full_name || user?.user_metadata?.full_name || 'User'}</p>
-                        <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{profile?.email || user?.email}</p>
-                      </div>
-                      <div className="divider mb-1" />
+                      className="glass-card absolute right-0 mt-2 w-52 p-2 z-50 flex flex-col gap-0.5 shadow-xl">
                       {[
                         { href: '/account',           icon: User,     label: 'My Account' },
                         { href: '/account/orders',    icon: Package,  label: 'My Orders'  },
@@ -184,22 +175,24 @@ export default function Navbar() {
                         ...(isAdmin ? [{ href: '/admin', icon: Settings, label: 'Admin Panel' }] : []),
                       ].map(item => (
                         <Link key={item.href} href={item.href}
-                          className="nav-item text-sm w-full">
-                          <item.icon size={14} />{item.label}
+                          className="nav-item text-sm w-full flex items-center gap-3 px-3 py-2 rounded-md">
+                          <item.icon size={15} style={{ color: 'var(--text-muted)' }} />
+                          <span className="font-medium">{item.label}</span>
                         </Link>
                       ))}
-                      <div className="divider my-1" />
+                      <div className="h-px w-full my-1" style={{ background: 'var(--border-light)' }} />
                       <button onClick={logout || signOut}
-                        className="nav-item text-sm w-full" style={{ color: 'var(--danger)' }}>
-                        <LogOut size={14} /> Sign out
+                        className="nav-item text-sm w-full flex items-center gap-3 px-3 py-2 rounded-md" style={{ color: 'var(--danger)' }}>
+                        <LogOut size={15} />
+                        <span className="font-medium">Sign out</span>
                       </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             ) : (
-              <Link href="/auth" className="btn btn-icon btn-secondary relative">
-                <User size={15} style={{ color: 'var(--text-secondary)' }} />
+              <Link href="/auth" className="btn btn-secondary" style={{ height: '34px', padding: '0 14px', borderRadius: 'var(--radius-md)' }}>
+                <User size={15} /> Sign in
               </Link>
             )}
 
