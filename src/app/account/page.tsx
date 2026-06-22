@@ -88,7 +88,11 @@ export default function AccountPage() {
 
   const handleDeleteAccount = () => {
     if (window.confirm('Are you sure you want to permanently delete your account? This action cannot be undone.')) {
-      toast.error('Account deletion requires admin approval. Please contact support.')
+import { GlassWater } from 'lucide-react';
+      toast.error(
+        'Account deletion requires admin approval. Please contact support at hello@shreeramveggies.online with your request.',
+        { duration: 6000 }
+      )
     }
   }
 
