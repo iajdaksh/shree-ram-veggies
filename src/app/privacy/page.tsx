@@ -1,6 +1,12 @@
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Lock } from 'lucide-react'
+import { format } from 'date-fns'
+
+const getCurrentDate = () => {
+  // This will format the date as "Month Year", e.g., "June 2024"
+  return format(new Date(), 'MMMM yyyy')
+}
 
 export default function PrivacyPage() {
   const sections = [
@@ -26,7 +32,7 @@ export default function PrivacyPage() {
               <Lock size={40} style={{ color: 'var(--accent)' }} />
             </div>
             <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Privacy Policy</h1>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Last updated: December 2024 · We respect and protect your privacy.</p>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Last updated: {getCurrentDate()} · We respect and protect your privacy.</p>
           </div>
           <div className="space-y-4">
             {sections.map(s => (

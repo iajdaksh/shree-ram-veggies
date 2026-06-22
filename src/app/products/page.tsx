@@ -143,39 +143,7 @@ export default function ProductsPage() {
           {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filtered.map((p, i) => (
-              <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }} viewport={{ once: true }}
-                className="glass-card p-5 flex flex-col h-full">
-                <div className="h-36 rounded-xl flex items-center justify-center mb-4 relative overflow-hidden"
-                  style={{ background: 'var(--bg-tertiary)' }}>
-                  {p.image_url ? <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" /> : (
-                    () => {
-                      const Icon = PRODUCT_ICONS[p.category] || GlassWater;
-                      return <Icon size={48} style={{ color: 'var(--accent)' }} />
-                    }
-                  )()}
-                  {p.badge && (
-                    <span className={`badge ${p.badge === 'bestseller' || p.badge === 'popular' || p.badge === 'premium' ? 'badge-amber' : 'badge-green'}`}
-                      style={{ position: 'absolute', top: 8, right: 8, textTransform: 'capitalize' }}>
-                      {p.badge}
-                    </span>
-                  )}
-                </div>
-                <div className="flex-1 flex flex-col">
-                  <h3 className="font-bold mb-1" style={{ color: 'var(--text-primary)' }}>{p.name}</h3>
-                  <p className="text-xs mb-4 line-clamp-2 flex-1" style={{ color: 'var(--text-muted)' }}>{p.description}</p>
-                  <div className="flex items-center justify-between mt-auto pt-4 border-t" style={{ borderColor: 'var(--border-light)' }}>
-                    <div className="flex items-baseline">
-                      <span className="text-lg font-bold leading-none" style={{ color: 'var(--text-primary)' }}>₹{p.price}</span>
-                      <span className="text-xs ml-1 leading-none" style={{ color: 'var(--text-muted)' }}>/{p.unit}</span>
-                    </div>
-                    <button onClick={() => handleAdd(p)}
-                      className="flex items-center gap-1.5 btn-primary text-xs px-3 py-1.5 rounded-full">
-                      <ShoppingCart size={13} /> Add
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
+              <ProductCard key={p.id} p={p} i={i} handleAdd={handleAdd} />
             ))}
           </div>
 
