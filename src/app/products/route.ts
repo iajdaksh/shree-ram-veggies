@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase with the service role key to bypass RLS
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+);
 
 export async function POST(request: NextRequest) {
   try {
-    const { id, email, full_name, phone, whatsapp_number } = await request.json()
+    const { id, email, full_name, phone, whatsapp_number } = await request.json();
 
     if (!email) {
-      return NextResponse.json({ success: false, error: 'Email is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'Email is required' }, { status: 400 });
     }
 
     // Use upsert to either create a new profile or update an existing one.
@@ -33,9 +33,9 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    return NextResponse.json({ success: true, data })
+    return NextResponse.json({ success: true, data });
   } catch (error: any) {
-    console.error('Error in /api/update-profile:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    console.error('Error in /api/update-profile:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
