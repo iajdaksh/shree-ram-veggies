@@ -13,7 +13,7 @@ const ACCOUNT_LINKS = [
 ]
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
-  const { user, profile, loading, signOut } = useAuth()
+  const { user, profile, loading, logout } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
                     <Home size={18} style={{ color: 'var(--text-muted)' }} />
                     <span className="font-medium">Home</span>
                   </Link>
-                  <button onClick={signOut} className="sidebar-item flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-left transition-colors hover:bg-white/5" style={{ color: 'var(--danger)' }}>
+                  <button onClick={logout} className="sidebar-item flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-left transition-colors hover:bg-white/5" style={{ color: 'var(--danger)' }}>
                     <LogOut size={18} />
                     <span className="font-medium">Sign Out</span>
                   </button>
