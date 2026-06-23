@@ -21,7 +21,6 @@ type AuthContextType = {
   signInEmail:    (email: string, password: string) => Promise<{ error?: string, data?: any }>
   signUpEmail:    (email: string, password: string, name: string) => Promise<{ error?: string, data?: any }>
   logout:         () => Promise<void>
-  signOut:        () => Promise<void>
   refreshProfile: () => Promise<void>
 }
 
@@ -136,7 +135,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInEmail,
       signUpEmail,
       logout,
-      signOut: logout,
       refreshProfile,
     }}>
       {children}
