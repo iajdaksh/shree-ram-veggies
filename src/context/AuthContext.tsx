@@ -33,24 +33,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      // This listener handles all auth events: INITIAL_SESSION, SIGNED_IN, SIGNED_OUT.
-      // It's the single source of truth for the user's session.
-
-      setUser(session?.user || null)
-
-      if (session?.user?.email) {
-        setLoading(true)
-        fetchProfile(session.user.email, session.user.user_metadata?.full_name)
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.email!, session.user.user_metadata?.full_name);
       } else {
-        // User is logged out or session is null
-        setProfile(null)
-        setLoading(false)
+        setProfile(null);
+        setLoading(false);
       }
-    })
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const fetchProfile = async (email: string, userName?: string | null) => {
     try {
