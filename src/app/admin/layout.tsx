@@ -1,10 +1,11 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, FC } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, ChevronRight, Home } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import CustomCursor from '@/components/CustomCursor'
 
 const ADMIN_LINKS = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -14,23 +15,56 @@ const ADMIN_LINKS = [
   { href: '/admin/settings', icon: Settings, label: 'Settings' },
 ]
 
+interface SidebarLinkProps {
+  href: string;
+  icon: React.ElementType;
+  label: string;
+  isActive: boolean;
+  onClick?: () => void;
+  isButton?: boolean;
+  className?: string;
+}
+
+const SidebarLink: FC<SidebarLinkProps> = ({ href, icon: Icon, label, isActive, onClick, isButton, className = '' }) => {
+  const content = (
+    <>
+      <Icon size={16} className={isActive ? 'text-white' : 'text-[var(--text-muted)]'} />
+      <span className="font-medium">{label}</span>
+      {isActive && <ChevronRight size={14} className="ml-auto" />}
+    </>
+  );
+
+  const classes = `flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+    isActive ? 'bg-white/10 text-white' : 'text-[var(--text-secondary)] hover:bg-white/5 hover:text-white'
+  } ${className}`;
+
+  if (isButton) {
+    return <button onClick={onClick} className={`w-full text-left ${classes}`}>{content}</button>;
+  }
+
+  return <Link href={href} className={classes}>{content}</Link>;
+};
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { profile, loading, signOut } = useAuth()
+  const { profile, loading, logout } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
-    if (!loading && profile && profile.role !== 'admin') router.push('/')
-    if (!loading && !profile) router.push('/auth')
-  }, [profile, loading])
+    if (loading) return;
+    if (!profile) router.push('/auth');
+    else if (profile.role !== 'admin') router.push('/');
+  }, [profile, loading, router])
 
-  if (loading || !profile) return null
-  if (profile.role !== 'admin') return null
+  if (loading || !profile || profile.role !== 'admin') {
+    return <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}><span className="w-8 h-8 border-4 border-current border-t-transparent rounded-full animate-spin" style={{ color: 'var(--accent)' }} /></div>;
+  }
 
   return (
     <div className="min-h-screen flex" style={{ background: 'var(--bg-primary)' }}>
+      <CustomCursor />
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 h-screen sticky top-0 flex flex-col p-4" style={{ background: 'var(--bg-secondary)', borderRight: '1px solid var(--glass-border)' }}>
+      <aside className="w-60 shrink-0 h-screen sticky top-0 flex flex-col p-4" style={{ background: 'var(--bg-secondary)', borderRight: '1px solid var(--glass-border)' }}>
         {/* Logo */}
         <div className="flex items-center gap-3 px-2 py-4 mb-4">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
@@ -43,27 +77,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <nav className="flex-1 space-y-1">
           {ADMIN_LINKS.map(link => (
-            <Link key={link.href} href={link.href}
-              className={`sidebar-item ${pathname === link.href ? 'active' : ''}`}>
-              <link.icon size={16} />{link.label}
-              {pathname === link.href && <ChevronRight size={14} className="ml-auto" />}
-            </Link>
+            <SidebarLink
+              key={link.href}
+              href={link.href}
+              icon={link.icon}
+              label={link.label}
+              isActive={pathname === link.href}
+            />
           ))}
         </nav>
 
         <div className="space-y-1 mt-4 pt-4 border-t" style={{ borderColor: 'var(--glass-border)' }}>
-          <Link href="/" className="sidebar-item"><Home size={16} />View Site</Link>
-          <button onClick={signOut} className="sidebar-item w-full text-left" style={{ color: 'var(--danger)' }}>
-            <LogOut size={16} />Sign Out
-          </button>
+          <SidebarLink href="/" icon={Home} label="View Site" isActive={false} />
+          <SidebarLink
+            href="#"
+            icon={LogOut}
+            label="Sign Out"
+            isActive={false}
+            isButton
+            onClick={logout}
+            className="!text-red-500 hover:!bg-red-500/10 hover:!text-red-400"
+          />
         </div>
       </aside>
 
       {/* Main */}
       <main className="flex-1 p-6 overflow-auto">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={pathname}>
-          {children}
-        </motion.div>
+        <AnimatePresence mode="wait"><motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} key={pathname}>{children}</motion.div></AnimatePresence>
       </main>
     </div>
   )

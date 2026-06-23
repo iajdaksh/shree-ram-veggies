@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { useCartStore } from '@/lib/cartStore'
-import { ShoppingCart, Menu, X, User, LogOut, Settings, Package, MapPin, ChevronDown, Leaf } from 'lucide-react'
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
+import { ShoppingCart, Menu, X, User, LogOut, Settings, Package, MapPin, Leaf } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import CustomCursor from './CustomCursor'
 
 const NAV_LINKS = [
   { href: '/',         label: 'Home'     },
@@ -16,24 +17,13 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const pathname   = usePathname()
-  const { user, profile, logout, signOut, isAdmin } = useAuth()
+  const { user, profile, logout, isAdmin } = useAuth()
   const totalItems = useCartStore(s => s.totalItems())
   const [scrolled,     setScrolled]     = useState(false)
   const [mobileOpen,   setMobileOpen]   = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [isMounted,    setIsMounted]    = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
-
-  // Smooth Cursor States
-  const [isHovering, setIsHovering] = useState(false)
-  const [isClicking, setIsClicking] = useState(false)
-
-  const cursorX = useMotionValue(-100)
-  const cursorY = useMotionValue(-100)
-  const ringX = useSpring(cursorX, { stiffness: 150, damping: 15, mass: 0.5 })
-  const ringY = useSpring(cursorY, { stiffness: 150, damping: 15, mass: 0.5 })
-  const dotX = useSpring(cursorX, { stiffness: 800, damping: 30, mass: 0.5 })
-  const dotY = useSpring(cursorY, { stiffness: 800, damping: 30, mass: 0.5 })
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
@@ -55,62 +45,9 @@ export default function Navbar() {
     setIsMounted(true)
   }, [])
 
-  useEffect(() => {
-    let rafId: number
-    const handleMouseMove = (e: MouseEvent) => {
-      // Update Framer Motion Springs
-      cursorX.set(e.clientX)
-      cursorY.set(e.clientY)
-      
-      // Update Global Glow Effect
-      cancelAnimationFrame(rafId)
-      rafId = requestAnimationFrame(() => {
-        document.documentElement.style.setProperty('--cursor-x', `${e.clientX}px`)
-        document.documentElement.style.setProperty('--cursor-y', `${e.clientY}px`)
-      })
-    }
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      setIsHovering(!!target.closest('a, button, input, textarea, select, [role="button"]'))
-    }
-    const handleMouseDown = () => setIsClicking(true)
-    const handleMouseUp = () => setIsClicking(false)
-
-    window.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseover', handleMouseOver)
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('mouseup', handleMouseUp)
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseover', handleMouseOver)
-      document.removeEventListener('mousedown', handleMouseDown)
-      document.removeEventListener('mouseup', handleMouseUp)
-      cancelAnimationFrame(rafId)
-    }
-  }, [])
-
   return (
     <>
-      <div className="cursor-glow hidden sm:block" />
-      
-      {/* Interactive Framer Motion Cursor */}
-      <motion.div
-        className="custom-cursor-dot hidden sm:block"
-        style={{ x: dotX, y: dotY, left: -4, top: -4 }}
-        animate={{ scale: isHovering ? 0 : 1, opacity: isHovering ? 0 : 1 }}
-        transition={{ duration: 0.15 }}
-      />
-      <motion.div
-        className="custom-cursor-ring hidden sm:block"
-        style={{ x: ringX, y: ringY, left: -18, top: -18 }}
-        animate={{
-          scale: isClicking ? 0.8 : isHovering ? 1.5 : 1,
-          backgroundColor: isHovering ? 'rgba(142, 182, 155, 0.4)' : 'rgba(142, 182, 155, 0)',
-          borderColor: isHovering ? 'rgba(35, 83, 71, 0)' : 'var(--border-strong)'
-        }}
-        transition={{ duration: 0.15 }}
-      />
+      <CustomCursor />
 
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 nav ${scrolled ? 'py-3' : 'py-4'}`}>
         <div className="max-w-6xl mx-auto px-5 flex items-center justify-between">
@@ -150,7 +87,7 @@ export default function Navbar() {
             </Link>
 
             {/* User menu */}
-            {user || profile ? (
+            {profile ? (
               <div className="relative" ref={menuRef}>
                 <button onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="btn btn-icon btn-secondary relative">
@@ -181,7 +118,7 @@ export default function Navbar() {
                         </Link>
                       ))}
                       <div className="h-px w-full my-1" style={{ background: 'var(--border-light)' }} />
-                      <button onClick={logout || signOut}
+                      <button onClick={logout}
                         className="nav-item text-sm w-full flex items-center gap-3 px-3 py-2 rounded-md" style={{ color: 'var(--danger)' }}>
                         <LogOut size={15} />
                         <span className="font-medium">Sign out</span>

@@ -32,30 +32,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let mounted = true
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (mounted) {
-        setUser(session?.user || null)
-        if (session?.user?.email) fetchProfile(session.user.email, session.user.user_metadata?.full_name)
-        else setLoading(false)
-      }
-    })
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (_event === 'INITIAL_SESSION') return // Prevent double fetch on initial load
+      // This listener handles all auth events: INITIAL_SESSION, SIGNED_IN, SIGNED_OUT.
+      // It's the single source of truth for the user's session.
 
       setUser(session?.user || null)
+
       if (session?.user?.email) {
         setLoading(true)
         fetchProfile(session.user.email, session.user.user_metadata?.full_name)
       } else {
+        // User is logged out or session is null
         setProfile(null)
         setLoading(false)
       }
     })
     return () => {
-      mounted = false
       subscription.unsubscribe()
     }
   }, [])
