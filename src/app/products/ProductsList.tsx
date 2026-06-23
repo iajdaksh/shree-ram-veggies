@@ -29,9 +29,6 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-export default function ProductsPage() {
-};
-
 export default function ProductsList() {
   const searchParams = useSearchParams();
   const category = searchParams.get('category');
